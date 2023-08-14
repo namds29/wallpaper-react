@@ -1,0 +1,13 @@
+.container {
+    display: flex;
+    height: calc(100vh - 64px);
+    background-color: #1a1c24;
+    color: white;
+    .main-content {
+        position: relative;
+        width: 100%;
+        background-color: black;
+        border-radius: 20px;
+        padding: 1.3rem 1.5rem;
+    }
+}
