@@ -1,41 +1,50 @@
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import FilterWallpaper from "./features/filter-wallpaper";
 import FetchWallpaper from "./features/fetch-wallpaper";
-import { WallpaperProvider } from "./context/wallpaper-context";
-import ModalCreateWallpaper from "./features/modal-create-wallpaper";
+import useFetchWallpaper from "../../hooks/useFetchWallpaper";
 
 
 interface pageProps {}
 
-const Wallpapers: FC<pageProps> = ({}) => {
-  const [open, setOpen] = useState<boolean>(false);
-  const [isCreateSuccess, setIsCreateSuccess] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+const Page: FC<pageProps> = ({}) => {
+  const [categoryId, setCategoryId] = useState<number>();
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const {
+    wallpapers,
+    totalPages,
+    currentPage,
+    pageSize,
+    setTotalPages,
+    setPageSize,
+    setCurrentPage,
+    fetchWallpaper,
+  } = useFetchWallpaper(categoryId);
+  const updateCategoryId = (id: number) => {
+    setCategoryId(id);
+  };
+  useEffect(() => {
+    const token = localStorage.getItem("token") ?? "";
+    fetchWallpaper(token);
+  }, [categoryId,updateSuccess]);
   return (
-    <WallpaperProvider>
-      <div>
-        <FilterWallpaper />
-        <div className="text-right my-3">
-          <button
-            className="rounded px-4 py-3 bg-blue-500 "
-            onClick={handleOpen}
-          >
-            + Add Wallpaper
-          </button>
-        </div>
-        {open && (
-          <ModalCreateWallpaper
-            setIsCreateSuccess={setIsCreateSuccess}
-            open={open}
-            handleClose={handleClose}
-          />
-        )}
-        <FetchWallpaper />
-      </div>
-    </WallpaperProvider>
+    <div>
+      <FilterWallpaper
+        updateCategoryId={updateCategoryId}
+        fetchWallpaper={fetchWallpaper}
+      />
+      <FetchWallpaper
+        wallpapers={wallpapers}
+        pageSize={pageSize}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        setTotalPages={setTotalPages}
+        setPageSize={setPageSize}
+        setCurrentPage={setCurrentPage}
+        setUpdateSuccess={setUpdateSuccess}
+      />
+    </div>
   );
 };
 
-export default Wallpapers;
+export default Page;

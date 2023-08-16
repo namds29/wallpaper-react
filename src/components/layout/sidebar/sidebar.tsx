@@ -10,9 +10,8 @@ import {
 const Sidebar = ({ menuOpen }: any) => {
     const menuItem = [
       { title: "Dashboard", icon: <DashboardIcon />, route: "/dashboard" },
-      { title: "Theme", icon: <ReportIcon />, route: "/theme" },
+      { title: "Category", icon: <ReportIcon />, route: "/category" },
       { title: "Wallpaper", icon: <OrderIcon />, route: "/wallpaper" },
-      { title: "Animation", icon: <AnimationIcon />, route: "/animation" },
     ]
     return (
         <div className={styles.sidebar}>
