@@ -3,7 +3,7 @@ import axios from "axios";
 type Wallpaper = {
   name: string;
   category: number;
-  priceType: number;
+  priceType: any;
   price: number;
   priorityNewest: number;
   priorityCategory: number;
@@ -76,7 +76,8 @@ const updateWallpaper = async (
   id: number
 ) => {
   const formData = new FormData();
-
+  console.log(wallpaper);
+  
   formData.append("name", wallpaper.name);
   formData.append("category", wallpaper.category.toString());
   formData.append("priceType", wallpaper.priceType.toString());
@@ -89,8 +90,12 @@ const updateWallpaper = async (
   const tags = wallpaper.tag;
   formData.append("tag", tags);
   formData.append("type", "1");
-  formData.append("contentFile", wallpaper.file[0]);
-  formData.append("avatar", wallpaper.avatar[0]);
+  for (let i = 0; i < wallpaper.file.length; i++) {
+    formData.append("contentFile", wallpaper.file[i]);
+  }
+  for (let i = 0; i < wallpaper.avatar.length; i++) {
+    formData.append("avatar", wallpaper.avatar[i]);
+  }
 
   let config = {
     method: "put",

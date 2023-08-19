@@ -28,11 +28,11 @@ export type CategoryDetail = {
 export type Wallpaper = {
   id: number;
   name: string;
-  priceType: string;
+  priceType: any;
   price: number;
   priorityNewest: number;
   priorityCategory: number;
-  priorityTrending: number;
+  trendingPriority: number;
   author: string;
   website: string;
   type: number;
@@ -51,7 +51,7 @@ export type Wallpaper = {
       size: number;
       mimetype: string;
       file_name: string;
-  }[];
+  };
   categoryId: number;
   tag: string;
 };

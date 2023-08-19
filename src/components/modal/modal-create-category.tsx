@@ -3,7 +3,7 @@ import { Box, Modal, Typography } from "@mui/material";
 import React, { useState, Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import categoryService from "../../services/categoryService";
-
+import { Spin } from "antd";
 type Props = {
   // Define your component props here
   open: boolean;
@@ -30,6 +30,7 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
   } = useForm();
   const [photo, setPhoto] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: any) => {
     const token = localStorage.getItem("token") ?? "";
@@ -38,13 +39,21 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
       chartColor: data.chartColor,
       file: data.photo,
     };
-    const res = await categoryService.createCategory(token, categoryInfor);
+    setIsLoading(true);
+    try {
+      const res = await categoryService.createCategory(token, categoryInfor);
 
-    if (res.status === 200) {
-      handleClose();
-      setIsCreateSuccess(true);
-      alert("Create success");
+      if (res.status === 200) {
+        setIsLoading(false);
+        handleClose();
+        setIsCreateSuccess(true);
+        alert("Create success");
+      }
+    } catch (error) {
+      setIsLoading(false);
+      alert("Create fail!");
     }
+   
   };
   const handlePhotoChange = (e: any) => {
     const file = e.target.files[0];
@@ -115,12 +124,24 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
           )}
 
           <div className="flex justify-end">
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md"
-            >
-              Submit
-            </button>
+          {isLoading ? (
+              <Spin>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                  disabled
+                >
+                  Submit
+                </button>
+              </Spin>
+            ) : (
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+              >
+                Submit
+              </button>
+            )}
             <button
               type="button"
               onClick={handleClose}

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { ListCategory } from "../../shared/types/wallpapers-type";
 import wallpaperService from "../../services/wallpaperService";
 import categoryService from "../../services/categoryService";
+import { Spin } from "antd";
 
 type Props = {
   // Define your component props here
@@ -40,11 +41,12 @@ const ModalCreateWallpaper: React.FC<Props> = ({
   const [previewImgContent, setPreviewImgContent] = useState<string | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedOption, setSelectedOption] = useState(0); // Set initial color value
   const [categoryList, getCategoryList] = useState<ListCategory[]>([]);
+  const [video, setVideo] = useState<any>();
 
   const handleOptionChange = (e: any) => {
-    console.log(e);
     setSelectedOption(e);
   };
 
@@ -70,17 +72,24 @@ const ModalCreateWallpaper: React.FC<Props> = ({
       avatar: data.avatar,
       file: data.file,
     };
-
-    const res = await wallpaperService.createWallpaper(wallPaperInfor);
-    if (res.status === 200) {
+    setIsLoading(true);
+    try {
+      const res = await wallpaperService.createWallpaper(wallPaperInfor);
+      setIsLoading(false);
       handleClose();
       alert("Create success");
+    } catch (error) {
+      setIsLoading(false);
+      alert("Create fail!");
     }
+  };
+  const handleVideoChange = (e: any) => {
+    const file = e.target.files[0];
+    const url = URL.createObjectURL(file);
+    setVideo(url);
   };
   const handleAvatarChange = (e: any) => {
     const file = e.target.files[0];
-    console.log(file);
-
     setPreviewImgAvatar(URL.createObjectURL(file));
   };
   const handleContentChange = (e: any) => {
@@ -208,6 +217,7 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                       type="text"
                       className=" border border-gray-300 rounded-md px-2 py-1"
                       placeholder="Enter newest number"
+                      defaultValue={0}
                       {...register("priorityNewest", {
                         required: true,
                         valueAsNumber: true,
@@ -220,6 +230,7 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                       type="number"
                       className=" border border-gray-300 rounded-md px-2 py-1"
                       placeholder="Enter category number"
+                      defaultValue={0}
                       {...register("priorityCategory", {
                         required: true,
                         valueAsNumber: true,
@@ -232,6 +243,7 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                       type="number"
                       className=" border border-gray-300 rounded-md px-2 py-1"
                       placeholder="Enter trending"
+                      defaultValue={0}
                       {...register("priorityTrending", {
                         required: true,
                         valueAsNumber: true,
@@ -298,8 +310,9 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                     {...register("contentType", { required: true })}
                   >
                     {/* <option selected disabled hidden>Choose a country</option> */}
-                    <option value="0">single_image</option>
-                    <option value="1">double_image</option>
+                    <option value="1">single_image</option>
+                    <option value="2">double_image</option>
+                    <option value="3">video</option>
                   </select>
                 </div>
                 <div className="flex mb-4 gap-10">
@@ -321,7 +334,7 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                           <div className="relative w-full h-96 bg-gray-200 rounded">
                             <img
                               src={previewImgAvatar}
-                              className="object-contain mb-2"
+                              className="object-contain mb-2 h-full"
                               alt=""
                             />
                           </div>
@@ -339,22 +352,50 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                         type="file"
                         id="thumb"
                         accept="image/*"
-                        {...register("file", { onChange: handleContentChange })}
+                        {...register("file", {
+                          required: true,
+                          onChange: handleContentChange
+                        })}
                       />
                     </div>
                     <div className="w-full">
-                      {previewImgContent && (
-                        <div className="mb-6">
-                          <div className="relative w-full h-96 bg-gray-200 rounded">
-                            <img
-                              src={previewImgContent}
-                              className="object-contain mb-2 h-full"
-                              alt=""
-                            />
+                    {previewImgContent && (
+                      <div className="mb-6">
+                        <div className="relative w-full h-96 bg-gray-200 rounded">
+                          <img
+                            src={previewImgContent}
+                            className="object-contain mb-2 h-full"
+                            alt=""
+                          />
+                        </div>
+                      </div>
+                    )}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-4">
+                    <label htmlFor="photo" className="block mb-4 font-medium">
+                      Video File:
+                    </label>
+                    <input
+                      type="file"
+                      id="video"
+                      
+                      {...register("video", { onChange: handleVideoChange })}
+                    />
+                  </div>
+                  <div className="w-full">
+                  {video && (
+                        <div className="mb-6 ">
+                          <div className="relative flex justify-center w-full h-96 bg-gray-200 rounded">
+                            <video style={{ height: "inherit" }} controls>
+                              <source src={video} type="video/mp4" />
+                            </video>
                           </div>
                         </div>
                       )}
-                    </div>
+                  
                   </div>
                 </div>
               </div>
@@ -362,12 +403,24 @@ const ModalCreateWallpaper: React.FC<Props> = ({
           </div>
 
           <div className="flex justify-end mt-4">
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md"
-            >
-              Submit
-            </button>
+            {isLoading ? (
+              <Spin>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                  disabled
+                >
+                  Submit
+                </button>
+              </Spin>
+            ) : (
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+              >
+                Submit
+              </button>
+            )}
             <button
               type="button"
               onClick={handleClose}

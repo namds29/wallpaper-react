@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { ListCategory, Wallpaper } from "../../shared/types/wallpapers-type";
 import wallpaperService from "../../services/wallpaperService";
 import categoryService from "../../services/categoryService";
-
+import { Spin } from "antd";
 type Props = {
   // Define your component props here
   open: boolean;
@@ -48,24 +48,31 @@ const ModalEditWallpapers: React.FC<Props> = ({
     formState: { errors },
   } = useForm({});
 
-
+  const [isLoading, setIsLoading] = useState(false);
   const [fileName, setFileName] = useState<any>(null);
   const [thumbName, setThumbName] = useState<any>(null);
   const [categoryList, setCategoryList] = useState<ListCategory[]>([]);
-  const [priceTypeMap, setPriceTypeMap] = useState<number | undefined>(
+  const [priceTypeMap, setPriceTypeMap] = useState<string | undefined>(
     wallpaperDetail?.priceType
+  );
+  const [previewImgAvatar, setPreviewImgAvatar] = useState<any>(wallpaperDetail?.avatar.path);
+  const [previewImgContent, setPreviewImgContent] = useState<any>(
+    wallpaperDetail?.contentFile.path
   );
   const [textTagArea, setTextTagArea] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(
     wallpaperDetail?.categoryId
   );
-  const [checkedPriceType, setCheckedPricetype] = useState<
-    number | undefined
-  >();
+
   const [previewImage, setPreviewImage] = useState<string | undefined>(
     wallpaperDetail?.avatar.path
   );
-
+  console.log(wallpaperDetail);
+  const convertPriceType = (priceType: string) => {
+    if (priceType == 'Free') return '0';
+    if (priceType == 'IAP') return '1';
+    if (priceType == 'COIN') return '2';
+  }
   const onSubmit = async (data: any) => {
     const token = localStorage.getItem("token") ?? "";
     const wordArray = data.tag
@@ -73,32 +80,41 @@ const ModalEditWallpapers: React.FC<Props> = ({
       .map((item: string) => item.trim())
       .filter((item: string) => item != "");
     if (wallpaperDetail) {
+      console.log(convertPriceType(data.priceType));
+
       const wallPaperInfor = {
-        name: wallpaperDetail.name,
+        name: data.name,
         category: Number(data.category),
-        priceType: Number(data.priceType),
+        priceType: convertPriceType(data.priceType),
         price: 0,
         priorityNewest: data.priorityNewest,
         priorityCategory: data.priorityCategory,
         priorityTrending: data.priorityTrending,
         author: data.author,
         website: data.website,
-        tag: wordArray,
+        tag: data.tag,
         contentType: Number(data.contentType),
-        thumb: data.thumb,
+        avatar: data.avatar,
         file: data.file,
       };
-      const res = await wallpaperService.updateWallpaper(
-        token,
-        wallPaperInfor,
-        wallpaperDetail.id
-      );
+      setIsLoading(true);
+      try {
+        const res = await wallpaperService.updateWallpaper(
+          token,
+          wallPaperInfor,
+          wallpaperDetail.id
+        );
 
-      if (res.status === 200) {
-        handleClose();
-        setUpdateSuccess(true);
-        alert("Update success");
+        if (res.status === 200) {
+          handleClose();
+          setIsLoading(false);
+          alert("Update success");
+        }
+      } catch (error) {
+        setIsLoading(false);
+        alert("Updated fail!");
       }
+
     }
   };
   const handleThumbChange = (e: any) => {
@@ -115,6 +131,14 @@ const ModalEditWallpapers: React.FC<Props> = ({
     const listCategory = await categoryService.getCategoryList(token);
     setCategoryList(listCategory);
   };
+  const handleAvatarChange = (e: any) => {
+    const file = e.target.files[0];
+    setPreviewImgAvatar(URL.createObjectURL(file));
+  };
+  const handleContentChange = (e: any) => {
+    const file = e.target.files[0];
+    setPreviewImgContent(URL.createObjectURL(file));
+  };
   useEffect(() => {
     getListCategory();
     setFileName(wallpaperDetail?.avatar.file_name);
@@ -125,7 +149,7 @@ const ModalEditWallpapers: React.FC<Props> = ({
           const parseTag = JSON.parse(wallpaperDetail.tag);
           const joinTag = parseTag.join(", ");
           setTextTagArea(joinTag);
-        }else{
+        } else {
           setTextTagArea(wallpaperDetail.tag);
         }
       }
@@ -154,6 +178,17 @@ const ModalEditWallpapers: React.FC<Props> = ({
             <div className="flex gap-10">
               <div>
                 <p className="mb-6 font-bold">Basic Infor</p>
+                <div className="gap-4 mb-4">
+                  <p className="mb-2 font-medium">Wallpaper name:</p>
+                  <input
+                    className=" border border-gray-300 rounded-md px-2 py-1"
+                    placeholder="Enter name"
+                    defaultValue={wallpaperDetail?.name}
+                    {...register("name", {
+                      required: true,
+                    })}
+                  />
+                </div>
                 <div className="mb-4">
                   <label htmlFor="name" className="block mb-2 font-medium">
                     Category*:
@@ -196,8 +231,8 @@ const ModalEditWallpapers: React.FC<Props> = ({
                               id="Free"
                               type="radio"
                               {...field}
-                              checked={field.value === "0"}
-                              value="0"
+                              checked={field.value === "Free"}
+                              value="Free"
                               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 "
                             />
                             <label
@@ -221,8 +256,8 @@ const ModalEditWallpapers: React.FC<Props> = ({
                               id="IAP"
                               type="radio"
                               {...field}
-                              checked={field.value === "1"}
-                              value="1"
+                              checked={field.value === "IAP"}
+                              value="IAP"
                               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 "
                             />
                             <label
@@ -248,8 +283,8 @@ const ModalEditWallpapers: React.FC<Props> = ({
                                 id="COIN"
                                 type="radio"
                                 {...field}
-                                checked={field.value === "2"}
-                                value="2"
+                                checked={field.value === "COIN"}
+                                value="COIN"
                                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 "
                               />
                               <label
@@ -299,7 +334,8 @@ const ModalEditWallpapers: React.FC<Props> = ({
                       type="number"
                       className=" border border-gray-300 rounded-md px-2 py-1"
                       placeholder="Enter trending"
-                      defaultValue={wallpaperDetail?.priorityTrending}
+                      
+                      defaultValue={wallpaperDetail?.trendingPriority}
                       {...register("priorityTrending", {
                         required: true,
                         valueAsNumber: true,
@@ -366,76 +402,91 @@ const ModalEditWallpapers: React.FC<Props> = ({
                   <select
                     id="small"
                     className="block w-full px-2 py-3 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    {...register("contentType")}
+                    {...register("contentType", { required: true })}
                   >
+                    {/* <option selected disabled hidden>Choose a country</option> */}
                     <option value="0">single_image</option>
                     <option value="1">double_image</option>
                   </select>
                 </div>
-                <div className="mb-4">
-                  <div className="mb-4">
-                    <label htmlFor="photo" className="block mb-4 font-medium">
-                      Content 1*:
-                    </label>
-                    <input
-                      type="file"
-                      id="file"
-                      accept="image/*"
-                      className="hidden"
-                      {...register("thumb", {
-                        onChange: handleFileChange,
-                      })}
-                    />
-                    <label
-                      htmlFor="file"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer"
-                    >
-                      {fileName ?? "Choose a photo"}
-                    </label>
-                  </div>
-                  <div className="mb-4">
-                    <label htmlFor="photo" className="block mb-4 font-medium">
-                      Thumbnail 1*:
-                    </label>
-                    <input
-                      type="file"
-                      id="thumb"
-                      accept="image/*"
-                      className="hidden"
-                      {...register("file", {
-                        onChange: handleThumbChange,
-                      })}
-                    />
-                    <label
-                      htmlFor="thumb"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer"
-                    >
-                      {thumbName ?? "Choose a photo"}
-                    </label>
-                  </div>
-                  {previewImage && (
-                    <div className="mb-6">
-                      <div className="relative w-full h-96 bg-gray-200 rounded">
-                        <img
-                          src={previewImage}
-                          alt="preview img"
-                          className="object-cover mb-2 w-full h-full"
-                        />
-                      </div>
+                <div className="flex mb-4 gap-10">
+                  <div>
+                    <div className="mb-4">
+                      <label htmlFor="photo" className="block mb-4 font-medium">
+                        Avatar File*:
+                      </label>
+                      <input
+                        type="file"
+                        id="file"
+                        accept="image/*"
+                        {...register("avatar", { onChange: handleAvatarChange })}
+                      />
                     </div>
-                  )}
+                    <div className="w-full">
+                      {previewImgAvatar && (
+                        <div className="mb-6">
+                          <div className="relative w-full h-96 bg-gray-200 rounded">
+                            <img
+                              src={previewImgAvatar}
+                              className="object-contain mb-2 h-full"
+                              alt=""
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="mb-4">
+                      <label htmlFor="photo" className="block mb-4 font-medium">
+                        Content File*:
+                      </label>
+                      <input
+                        type="file"
+                        id="thumb"
+                        accept="image/*"
+                        {...register("file", { onChange: handleContentChange })}
+                      />
+                    </div>
+                    <div className="w-full">
+                      {previewImgContent && (
+                        <div className="mb-6">
+                          <div className="relative w-full h-96 bg-gray-200 rounded">
+                            <img
+                              src={previewImgContent}
+                              className="object-contain mb-2 h-full"
+                              alt=""
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="flex justify-end mt-4">
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md"
-            >
-              Submit
-            </button>
+            {isLoading ? (
+              <Spin>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                  disabled
+                >
+                  Submit
+                </button>
+              </Spin>
+            ) : (
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+              >
+                Submit
+              </button>
+            )}
             <button
               type="button"
               onClick={handleClose}
