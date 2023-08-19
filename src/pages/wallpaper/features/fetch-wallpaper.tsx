@@ -56,6 +56,8 @@ const FetchWallpaper: FC<FetchWallpaperProps> = ({
     setListPage(pageArray);
   };
   useEffect(() => {
+    console.log(wallpapers);
+    
     generatePageArray();
   }, [totalPages]);
 
@@ -66,7 +68,7 @@ const FetchWallpaper: FC<FetchWallpaperProps> = ({
           wallpapers.map((item, index) => (
             <div key={index} className="bg-primary rounded w-full p-5 relative">
               <div
-                className="relative w-full h-72 cursor-pointer"
+                className="relative w-full h-80 cursor-pointer bg-black flex justify-center"
                 onClick={() => handleEdit(item)}
               >
                 <img
@@ -88,7 +90,7 @@ const FetchWallpaper: FC<FetchWallpaperProps> = ({
                 Download: {item.downloadCount}
               </div>
               <div className="mt-3 text-gray-500 text-sm">
-                Price Type: {item.priceType.type}
+                Price Type: {item.priceType}
               </div>
               <div className="mt-3 text-gray-500 text-sm">
                 Trending Priortiy: {item.trendingPriority}
@@ -96,10 +98,10 @@ const FetchWallpaper: FC<FetchWallpaperProps> = ({
               <div className="mt-3 text-gray-500 text-sm">
                 Category Priority: {item.priorityCategory}
               </div>
-              <div className="mt-3 text-red-500 text-sm">
+              <div className="mt-3 text-gray-500 text-sm">
                 Newest Priortiy: {item.priorityNewest}
               </div>
-              <div className="mt-3 text-red-500 text-sm">Time: {parseDate(item.time) }</div>
+              <div className="mt-3 text-gray-500 text-sm">Time: {parseDate(item.time) }</div>
             </div>
           ))}
       </div>

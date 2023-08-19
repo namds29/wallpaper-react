@@ -2,11 +2,13 @@ export type CategoryResponse = {
   id: number;
   name: string;
   chartColor: string;
-  download_count: number;
+  createdAt: string;
   avatar: {
     file_name: string;
     path: string;
   };
+  useCount: number,
+  downloadCount: number
 };
 export type ListCategory = {
   id: number,
@@ -18,12 +20,15 @@ export type CategoryDetail = {
   id: number;
   name: string;
   chartColor: string;
+  createdAt: string;
+  useCount: number;
+  downloadCount: number
 };
 
 export type Wallpaper = {
   id: number;
   name: string;
-  priceType: number;
+  priceType: string;
   price: number;
   priorityNewest: number;
   priorityCategory: number;

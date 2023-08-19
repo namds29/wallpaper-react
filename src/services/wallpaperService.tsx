@@ -12,7 +12,7 @@ type Wallpaper = {
   website: string;
   tag: string;
   contentType: number;
-  thumb: File[];
+  avatar: File[];
   file: File[];
 };
 async function fetchWallpaper(
@@ -38,7 +38,8 @@ async function fetchWallpaper(
   return res.data;
 }
 
-const createWallpaper = async (token: string, wallpaper: Wallpaper) => {
+const createWallpaper = async (wallpaper: Wallpaper) => {
+  const token = localStorage.getItem("token") ?? "";
   const formData = new FormData();
 
   formData.append("name", wallpaper.name);
@@ -51,14 +52,10 @@ const createWallpaper = async (token: string, wallpaper: Wallpaper) => {
   formData.append("author", wallpaper.author);
   formData.append("website", wallpaper.website);
   const tags = wallpaper.tag;
-  formData.append("tag", JSON.stringify(tags));
-  formData.append("contentType", wallpaper.contentType.toString());
-  for (let i = 0; i < wallpaper.thumb.length; i++) {
-    formData.append("thumb", wallpaper.thumb[i]);
-  }
-  for (let i = 0; i < wallpaper.file.length; i++) {
-    formData.append("file", wallpaper.file[i]);
-  }
+  formData.append("tag", tags);
+  formData.append("type", "1");
+  formData.append("contentFile", wallpaper.file[0]);
+  formData.append("avatar", wallpaper.avatar[0]);
 
   let config = {
     method: "post",
@@ -68,7 +65,9 @@ const createWallpaper = async (token: string, wallpaper: Wallpaper) => {
     },
     data: formData,
   };
+
   const res = await axios.request(config);
+  console.log(res);
   return res;
 };
 const updateWallpaper = async (
@@ -88,17 +87,10 @@ const updateWallpaper = async (
   formData.append("author", wallpaper.author);
   formData.append("website", wallpaper.website);
   const tags = wallpaper.tag;
-
-  formData.append("tag", JSON.stringify(tags));
-
-  formData.append("contentType", wallpaper.contentType.toString());
-
-  for (let i = 0; i < wallpaper.thumb.length; i++) {
-    formData.append("thumb", wallpaper.thumb[i]);
-  }
-  for (let i = 0; i < wallpaper.file.length; i++) {
-    formData.append("file", wallpaper.file[i]);
-  }
+  formData.append("tag", tags);
+  formData.append("type", "1");
+  formData.append("contentFile", wallpaper.file[0]);
+  formData.append("avatar", wallpaper.avatar[0]);
 
   let config = {
     method: "put",

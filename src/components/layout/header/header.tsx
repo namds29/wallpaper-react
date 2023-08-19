@@ -19,7 +19,7 @@ const Header = ({ handleMenuToggle }: any) => {
                 <MenuIcon />
               </IconButton>
               <Typography variant="h6" className={styles.title}>
-                Finger Front End
+                Wallpaper Front End
               </Typography>
             </div>
 

@@ -13,7 +13,6 @@ const LoginForm = () => {
   const {
     register,
     handleSubmit,
-    // formState: { errors },
   } = useForm<User>();
   const [errorMsg, setErrorMsg] = useState(false);
   const navigate = useNavigate();

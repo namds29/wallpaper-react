@@ -6,9 +6,13 @@ import {
   Select,
   SelectChangeEvent,
 } from "@mui/material";
-import { CategoryDetail, CategoryResponse } from "../../../shared/types/wallpapers-type";
+import {
+  CategoryDetail,
+  CategoryResponse,
+} from "../../../shared/types/wallpapers-type";
 import categoryService from "../../../services/categoryService";
 import ModalEditCategory from "../../../components/modal/modal-edit-category";
+import { parseDate } from "../../../shared/utils/parseDate";
 interface CategoryProps {
   isCreateSuccess: boolean;
 }
@@ -38,14 +42,16 @@ const FetchCategory: FC<CategoryProps> = ({ isCreateSuccess }) => {
       pageSize
     );
     const data = await res.data;
-
+    console.log(data);
     const contentCategory = data.data.map((item: CategoryResponse) => ({
       id: item.id,
       name: item.name,
       file_name: item.avatar.file_name,
       path: item.avatar.path,
       chartColor: item.chartColor,
-      download: item.download_count,
+      createdAt: item.createdAt,
+      useCount: item.useCount ?? 0,
+      downloadCount: item.downloadCount ?? 0,
     }));
     setTotalPages(Math.ceil(data.total / pageSize));
     setCategories(contentCategory);
@@ -90,10 +96,22 @@ const FetchCategory: FC<CategoryProps> = ({ isCreateSuccess }) => {
                   }}
                 />
               </div>
+              <div className="mt-3 text-gray-500 text-sm">
+                Chart Color: {item.chartColor}
+              </div>
+              <div className="mt-3 text-gray-500 text-sm">
+                Used: {item.useCount}
+              </div>
+              <div className="mt-3 text-gray-500 text-sm">
+                Downloaded: {item.downloadCount}
+              </div>
+              <div className="mt-3 text-red-500 text-sm">
+                Created at: {parseDate(item.createdAt)}
+              </div>
             </div>
           ))}
       </div>
-      <div className="flex gap-5 mt-3 justify-end">
+      {/* <div className="flex gap-5 mt-3 justify-end">
         {totalPages !== 0 && (
           <>
             <FormControl>
@@ -137,7 +155,7 @@ const FetchCategory: FC<CategoryProps> = ({ isCreateSuccess }) => {
             </FormControl>
           </>
         )}
-      </div>
+      </div> */}
       {isOpenEdit && (
         <ModalEditCategory
           categoryDetail={categoryDetail}

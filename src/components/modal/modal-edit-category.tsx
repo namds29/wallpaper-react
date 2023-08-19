@@ -142,12 +142,12 @@ const ModalEditCategory: React.FC<Props> = ({
               type="file"
               id="photo"
               accept="image/*"
-              className="absolute hidden"
+              // className="absolute hidden"
               {...register("photo", { onChange: handlePhotoChange })}
             />
-            <label htmlFor="photo" className="border border-gray-300 rounded-md px-3 py-2 cursor-pointer overflow-hidden whitespace-nowrap overflow-ellipsis">
+            {/* <label htmlFor="photo" className="border border-gray-300 rounded-md px-3 py-2 cursor-pointer overflow-hidden whitespace-nowrap overflow-ellipsis">
               {fileName ?? "Choose a photo"}
-            </label>
+            </label> */}
           </div>
           {previewImage && (
             <div className="mb-6">

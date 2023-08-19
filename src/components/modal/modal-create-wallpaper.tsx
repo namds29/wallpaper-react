@@ -1,4 +1,3 @@
-
 import { Box, Modal, Typography } from "@mui/material";
 
 import React, { useEffect, useState } from "react";
@@ -34,23 +33,30 @@ const ModalCreateWallpaper: React.FC<Props> = ({
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm();
-  const [thumb, setThumb] = useState<File | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState("#000000"); // Set initial color value
+
+  const [previewImgAvatar, setPreviewImgAvatar] = useState<string | null>(null);
+  const [previewImgContent, setPreviewImgContent] = useState<string | null>(
+    null
+  );
+  const [selectedOption, setSelectedOption] = useState(0); // Set initial color value
   const [categoryList, getCategoryList] = useState<ListCategory[]>([]);
+
+  const handleOptionChange = (e: any) => {
+    console.log(e);
+    setSelectedOption(e);
+  };
 
   const onSubmit = async (data: any) => {
     const token = localStorage.getItem("token") ?? "";
-    const wordArray = data.tag
-      .split(",")
-      .map((item: string) => item.trim())
-      .filter((item: string) => item != "");
+    // const wordArray = data.tag
+    //   .split(",")
+    //   .map((item: string) => item.trim())
+    //   .filter((item: string) => item != "");
 
     const wallPaperInfor = {
-      name: "test",
+      name: data.name,
       category: Number(data.category),
       priceType: Number(data.priceType),
       price: 0,
@@ -59,42 +65,42 @@ const ModalCreateWallpaper: React.FC<Props> = ({
       priorityTrending: data.priorityTrending,
       author: data.author,
       website: data.website,
-      tag: wordArray,
+      tag: data.tag,
       contentType: Number(data.contentType),
-      thumb: data.thumb,
+      avatar: data.avatar,
       file: data.file,
     };
-  
-    const res = await wallpaperService.createWallpaper(token, wallPaperInfor);
+
+    const res = await wallpaperService.createWallpaper(wallPaperInfor);
     if (res.status === 200) {
       handleClose();
       alert("Create success");
     }
   };
-  const handleThumbChange = (e: any) => {
+  const handleAvatarChange = (e: any) => {
     const file = e.target.files[0];
-    setThumb(file);
-    setPreviewImage(URL.createObjectURL(file));
+    console.log(file);
+
+    setPreviewImgAvatar(URL.createObjectURL(file));
   };
-  const handleFileChange = (e: any) => {
+  const handleContentChange = (e: any) => {
     const file = e.target.files[0];
-    setFile(file);
+    setPreviewImgContent(URL.createObjectURL(file));
   };
-  const getListCategory = async () =>{
+  const getListCategory = async () => {
     const token = localStorage.getItem("token") ?? "";
     const listCategory = await categoryService.getCategoryList(token);
     getCategoryList(listCategory);
-  }
-  useEffect(()=>{
+  };
+  useEffect(() => {
     getListCategory();
-    reset()
+    reset();
     return () => {
-      getCategoryList([])
+      getCategoryList([]);
     };
-  },[])
+  }, []);
   return (
     <Modal
-      
       open={open}
       onClose={handleClose}
       aria-labelledby="parent-modal-title"
@@ -110,18 +116,33 @@ const ModalCreateWallpaper: React.FC<Props> = ({
             <div className="flex gap-10">
               <div>
                 <p className="mb-6 font-bold">Basic Infor</p>
+                <div className="gap-4 mb-4">
+                  <p className="mb-2 font-medium">Wallpaper name:</p>
+                  <input
+                    className=" border border-gray-300 rounded-md px-2 py-1"
+                    placeholder="Enter name"
+                    {...register("name", {
+                      required: true,
+                    })}
+                  />
+                </div>
                 <div className="mb-4">
                   <label htmlFor="name" className="block mb-2 font-medium">
-                    Category*:
+                    Category:
                   </label>
                   <select
                     id="small"
                     {...register("category")}
                     className="block w-full px-2 py-3 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   >
+                    <option key={"cater-none"} value="">
+                      None
+                    </option>
                     {categoryList &&
                       categoryList.map((cateItem) => (
-                        <option key={cateItem.id} value={cateItem.id}>{cateItem.name}</option>
+                        <option key={cateItem.id} value={cateItem.id}>
+                          {cateItem.name}
+                        </option>
                       ))}
                   </select>
                 </div>
@@ -133,7 +154,11 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                         id="Free"
                         type="radio"
                         value="0"
-                        {...register("priceType", { required: true })}
+                        defaultChecked={true}
+                        {...register("priceType", {
+                          required: true,
+                          onChange: (e) => handleOptionChange(e),
+                        })}
                         className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 "
                       />
                       <label
@@ -277,50 +302,60 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                     <option value="1">double_image</option>
                   </select>
                 </div>
-                <div className="mb-4">
-                  <div className="mb-4">
-                    <label htmlFor="photo" className="block mb-4 font-medium">
-                      Content 1*:
-                    </label>
-                    <input
-                      type="file"
-                      id="file"
-                      accept="image/*"
-                      className="hidden"
-                      {...register("thumb", { onChange: handleFileChange })}
-                    />
-                    <label
-                      htmlFor="file"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer"
-                    >
-                      {file?.name ?? "Choose a photo"}
-                    </label>
-                  </div>
-                  <div className="mb-4">
-                    <label htmlFor="photo" className="block mb-4 font-medium">
-                      Thumbnail 1*:
-                    </label>
-                    <input
-                      type="file"
-                      id="thumb"
-                      accept="image/*"
-                      className="hidden"
-                      {...register("file", { onChange: handleThumbChange })}
-                    />
-                    <label
-                      htmlFor="thumb"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer"
-                    >
-                      {thumb?.name ?? "Choose a photo"}
-                    </label>
-                  </div>
-                  {previewImage && (
-                    <div className="mb-6">
-                      <div className="relative w-full h-96 bg-gray-200 rounded">
-                        <img src={previewImage} className="object-cover mb-2" alt="" />
-                      </div>
+                <div className="flex mb-4 gap-10">
+                  <div>
+                    <div className="mb-4">
+                      <label htmlFor="photo" className="block mb-4 font-medium">
+                        Avatar File*:
+                      </label>
+                      <input
+                        type="file"
+                        id="file"
+                        accept="image/*"
+                        {...register("avatar", { onChange: handleAvatarChange })}
+                      />
                     </div>
-                  )}
+                    <div className="w-full">
+                      {previewImgAvatar && (
+                        <div className="mb-6">
+                          <div className="relative w-full h-96 bg-gray-200 rounded">
+                            <img
+                              src={previewImgAvatar}
+                              className="object-contain mb-2"
+                              alt=""
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="mb-4">
+                      <label htmlFor="photo" className="block mb-4 font-medium">
+                        Content File*:
+                      </label>
+                      <input
+                        type="file"
+                        id="thumb"
+                        accept="image/*"
+                        {...register("file", { onChange: handleContentChange })}
+                      />
+                    </div>
+                    <div className="w-full">
+                      {previewImgContent && (
+                        <div className="mb-6">
+                          <div className="relative w-full h-96 bg-gray-200 rounded">
+                            <img
+                              src={previewImgContent}
+                              className="object-contain mb-2 h-full"
+                              alt=""
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
