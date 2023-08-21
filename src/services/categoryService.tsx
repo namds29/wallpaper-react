@@ -81,9 +81,23 @@ const getCategoryList = async (token: string) => {
   const res = await axios.request(config);
   return res.data;
 };
+async function deleteCategory(id: number) {
+  const token = localStorage.getItem('token')
+  let config = {
+    method: "delete",
+    url: import.meta.env.VITE_API_URL + "categories/"+ id,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const res = await axios.request(config);
+  return res;
+}
 export default {
   fetchCategory,
   updateCategory,
   createCategory,
   getCategoryList,
+  deleteCategory
 };

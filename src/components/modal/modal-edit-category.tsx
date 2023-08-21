@@ -1,8 +1,10 @@
 
 import { Box, Modal, Typography } from "@mui/material";
-import React, { Dispatch, SetStateAction, useState, useEffect } from "react";
+import React, { Dispatch, SetStateAction, useState, useEffect, useContext } from "react";
 import { useForm } from "react-hook-form";
 import categoryService from "../../services/categoryService";
+import { CategoryContext } from "../../pages/category/context/category-context";
+import { Spin } from "antd";
 
 type CategoryDetail = {
  file_name:string,
@@ -46,6 +48,16 @@ const ModalEditCategory: React.FC<Props> = ({
   
   const [fileName, setFileName] = useState<string | undefined | null>(null);
   const [previewImage, setPreviewImage] = useState<string | undefined>(categoryDetail?.path);
+  const {setIsSuccess} = useContext(CategoryContext)
+ const [isLoading, setIsLoading] = useState(false);
+  const handleDelete = async (id: number) => {
+    const res = await categoryService.deleteCategory(id);
+    if (res.status === 200) {
+      handleClose();
+      setIsSuccess(true);
+      alert("Delete success");
+    }
+  };
 
   const onSubmit = async (data: any) => {
     const token = localStorage.getItem("token") ?? "";
@@ -56,7 +68,7 @@ const ModalEditCategory: React.FC<Props> = ({
         chartColor: data.chartColor,
         file: data.photo,
       };
-
+      setIsLoading(true);
       const res = await categoryService.updateCategory(
         token,
         categoryUpdate,
@@ -64,6 +76,7 @@ const ModalEditCategory: React.FC<Props> = ({
       );
       if (res.status === 200) {
         handleClose();
+        setIsLoading(false);
         setUpdateSuccess(true);
         alert("Update success");
       }
@@ -81,7 +94,7 @@ const ModalEditCategory: React.FC<Props> = ({
     setPreviewImage(categoryDetail?.path);
     reset();
     return () => {
-      setUpdateSuccess(false);
+      setIsSuccess(false);
     };
   }, [categoryDetail]);
   return (
@@ -163,12 +176,33 @@ const ModalEditCategory: React.FC<Props> = ({
           )}
 
           <div className="flex justify-end">
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md"
-            >
-              Submit
-            </button>
+          {categoryDetail?.id && (
+              <button
+                type="button"
+                onClick={() => handleDelete(categoryDetail.id)}
+                className="ml-2 bg-red-500 text-white px-4 py-2 rounded"
+              >
+                Delete
+              </button>
+            )}
+            {isLoading ? (
+              <Spin>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                  disabled
+                >
+                  Submit
+                </button>
+              </Spin>
+            ) : (
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+              >
+                Submit
+              </button>
+            )}
             <button
               type="button"
               onClick={handleClose}

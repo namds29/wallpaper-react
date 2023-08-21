@@ -50,7 +50,9 @@ const ModalEditWallpapers: React.FC<Props> = ({
   const [previewImgAvatar, setPreviewImgAvatar] = useState<any>(
     wallpaperDetail?.avatar.path
   );
-  const [previewImgContent, setPreviewImgContent] = useState<any>(wallpaperDetail?.contentFile);
+  const [previewImgContent, setPreviewImgContent] = useState<any>(
+    wallpaperDetail?.contentFile
+  );
   const [textTagArea, setTextTagArea] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(
     wallpaperDetail?.categoryId
@@ -96,6 +98,7 @@ const ModalEditWallpapers: React.FC<Props> = ({
 
         if (res.status === 200) {
           handleClose();
+          setUpdateSuccess(true);
           setIsLoading(false);
           alert("Update success");
         }
@@ -105,7 +108,15 @@ const ModalEditWallpapers: React.FC<Props> = ({
       }
     }
   };
-
+  const handleDeleteWallPaper = async (id: number) => {
+    const res = await wallpaperService.deleteWallpaper(id);
+    if (res.status === 200) {
+      handleClose();
+      setUpdateSuccess(true);
+      setIsLoading(false);
+      alert("Delete success");
+    }
+  };
   const getListCategory = async () => {
     const token = localStorage.getItem("token") ?? "";
     const listCategory = await categoryService.getCategoryList(token);
@@ -464,7 +475,7 @@ const ModalEditWallpapers: React.FC<Props> = ({
                           multiple
                           accept="image/*"
                           {...register("file", {
-                            required: true,
+                            
                             onChange: handleContentChange,
                           })}
                         />
@@ -544,7 +555,17 @@ const ModalEditWallpapers: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end mt-4 gap-3">
+            {wallpaperDetail?.id && (
+              <button
+                type="button"
+                onClick={() => handleDeleteWallPaper(wallpaperDetail.id)}
+                className="ml-2 bg-red-500 text-white px-4 py-2 rounded"
+              >
+                Delete
+              </button>
+            )}
+
             {isLoading ? (
               <Spin>
                 <button

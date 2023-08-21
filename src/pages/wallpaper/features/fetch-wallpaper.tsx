@@ -21,6 +21,7 @@ interface FetchWallpaperProps {
   setUpdateSuccess: Dispatch<SetStateAction<boolean>>;
   isLoading: boolean;
   setIsLoading: any;
+  updateSuccess: boolean
 }
 
 const LIST_PAGE_SIZE = [10, 20, 30, 50, 100];
@@ -32,6 +33,7 @@ const FetchWallpaper: FC<FetchWallpaperProps> = ({
   setPageSize,
   setCurrentPage,
   setUpdateSuccess,
+  updateSuccess,
   isLoading,
 }) => {
   const [isOpenEdit, setIsOpenEdit] = useState(false);
@@ -59,10 +61,8 @@ const FetchWallpaper: FC<FetchWallpaperProps> = ({
     setListPage(pageArray);
   };
   useEffect(() => {
-   
-
     generatePageArray();
-  }, [isLoading, totalPages]);
+  }, [isLoading, totalPages, updateSuccess ]);
 
   return (
     <>

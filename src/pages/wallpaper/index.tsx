@@ -55,6 +55,7 @@ const Page: FC<pageProps> = ({}) => {
         setTotalPages={setTotalPages}
         setPageSize={setPageSize}
         setCurrentPage={setCurrentPage}
+        updateSuccess={updateSuccess}
         setUpdateSuccess={setUpdateSuccess}
         isLoading={isLoading}
         setIsLoading={setIsLoading}

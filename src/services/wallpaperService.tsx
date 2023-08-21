@@ -41,7 +41,19 @@ async function fetchWallpaper(
   const res = await axios.request(config);
   return res.data;
 }
+async function deleteWallpaper(id: number) {
+  const token = localStorage.getItem('token')
+  let config = {
+    method: "delete",
+    url: import.meta.env.VITE_API_URL + "wallpapers/"+ id,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
 
+  const res = await axios.request(config);
+  return res;
+}
 const createWallpaper = async (wallpaper: Wallpaper) => {
   const token = localStorage.getItem("token") ?? "";
   const formData = new FormData();
@@ -119,4 +131,4 @@ const updateWallpaper = async (
   return res;
 };
 
-export default { fetchWallpaper, createWallpaper, updateWallpaper };
+export default { fetchWallpaper, createWallpaper, updateWallpaper,deleteWallpaper };
