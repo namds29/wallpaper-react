@@ -38,25 +38,18 @@ const ModalCreateWallpaper: React.FC<Props> = ({
   } = useForm();
 
   const [previewImgAvatar, setPreviewImgAvatar] = useState<string | null>(null);
-  const [previewImgContent, setPreviewImgContent] = useState<string | null>(
-    null
-  );
+  const [previewImgContent, setPreviewImgContent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedOption, setSelectedOption] = useState(0); // Set initial color value
   const [categoryList, getCategoryList] = useState<ListCategory[]>([]);
   const [video, setVideo] = useState<any>();
+  const [type, setType] = useState<number>(1);
 
   const handleOptionChange = (e: any) => {
     setSelectedOption(e);
   };
 
   const onSubmit = async (data: any) => {
-    const token = localStorage.getItem("token") ?? "";
-    // const wordArray = data.tag
-    //   .split(",")
-    //   .map((item: string) => item.trim())
-    //   .filter((item: string) => item != "");
-
     const wallPaperInfor = {
       name: data.name,
       category: Number(data.category),
@@ -68,9 +61,9 @@ const ModalCreateWallpaper: React.FC<Props> = ({
       author: data.author,
       website: data.website,
       tag: data.tag,
-      contentType: Number(data.contentType),
-      avatar: data.avatar,
-      file: data.file,
+      type: Number(data.contentType),
+      avatar: data.avatar ?? data.videoAvatar,
+      file: Array.from(data.file ?? data.videoContent),
     };
     setIsLoading(true);
     try {
@@ -93,12 +86,24 @@ const ModalCreateWallpaper: React.FC<Props> = ({
     setPreviewImgAvatar(URL.createObjectURL(file));
   };
   const handleContentChange = (e: any) => {
-    const file = e.target.files[0];
-    setPreviewImgContent(URL.createObjectURL(file));
+    const files = Array.from(e.target.files);
+    const previews = files
+      .slice(0, 2)
+      .map((file: any) => URL.createObjectURL(file));
+
+    setPreviewImgContent(previews);
+  };
+  const handleChangeType = (e: any) => {
+    const val = +e.target.value;
+
+    if (val === 1) setType(1);
+    if (val === 2) setType(2);
+    if (val === 3) setType(3);
   };
   const getListCategory = async () => {
     const token = localStorage.getItem("token") ?? "";
     const listCategory = await categoryService.getCategoryList(token);
+
     getCategoryList(listCategory);
   };
   useEffect(() => {
@@ -307,86 +312,105 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                   <select
                     id="small"
                     className="block w-full px-2 py-3 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    {...register("contentType", { required: true })}
+                    {...register("contentType", {
+                      required: true,
+                      onChange: handleChangeType,
+                    })}
                   >
                     {/* <option selected disabled hidden>Choose a country</option> */}
-                    <option value="1">single_image</option>
-                    <option value="2">double_image</option>
+                    <option value="1">single image</option>
+                    <option value="2">double image</option>
                     <option value="3">video</option>
                   </select>
                 </div>
                 <div className="flex mb-4 gap-10">
-                  <div>
-                    <div className="mb-4">
-                      <label htmlFor="photo" className="block mb-4 font-medium">
-                        Avatar File*:
-                      </label>
-                      <input
-                        type="file"
-                        id="file"
-                        accept="image/*"
-                        {...register("avatar", { onChange: handleAvatarChange })}
-                      />
-                    </div>
-                    <div className="w-full">
-                      {previewImgAvatar && (
-                        <div className="mb-6">
-                          <div className="relative w-full h-96 bg-gray-200 rounded">
-                            <img
-                              src={previewImgAvatar}
-                              className="object-contain mb-2 h-full"
-                              alt=""
-                            />
+                  {(type == 1 || type == 3) && (
+                    <div className="avatar">
+                      <div className="mb-4">
+                        <label
+                          htmlFor="photo"
+                          className="block mb-4 font-medium"
+                        >
+                          Avatar File*:
+                        </label>
+                        <input
+                          type="file"
+                          id="file"
+                          accept="image/*"
+                          {...register("avatar", {
+                            onChange: handleAvatarChange,
+                          })}
+                        />
+                      </div>
+                      <div className="w-full">
+                        {previewImgAvatar && (
+                          <div className="mb-6">
+                            <div className="relative w-full h-96 bg-gray-200 rounded">
+                              <img
+                                src={previewImgAvatar}
+                                className="object-contain mb-2 h-full"
+                                alt=""
+                              />
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div>
+                  {(type == 1 || type == 2) && (
+                    <div className="content-file">
+                      <div className="mb-4">
+                        <label
+                          htmlFor="photo"
+                          className="block mb-4 font-medium"
+                        >
+                          Content File*:
+                        </label>
+                        <input
+                          type="file"
+                          id="thumb"
+                          multiple
+                          accept="image/*"
+                          {...register("file", {
+                            required: true,
+                            onChange: handleContentChange,
+                          })}
+                        />
+                      </div>
+                      <div className="w-full flex gap-5">
+                        {previewImgContent &&
+                          previewImgContent.map((item: string, id: number) => (
+                            <div key={id} className="mb-6">
+                              <div className="relative w-full h-96 bg-gray-200 rounded">
+                                <img
+                                  src={item}
+                                  className="object-contain mb-2 h-full"
+                                  alt=""
+                                />
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {type == 2 && (
+                  <div className="video-class">
                     <div className="mb-4">
                       <label htmlFor="photo" className="block mb-4 font-medium">
-                        Content File*:
+                        Video Avatar:
                       </label>
                       <input
                         type="file"
-                        id="thumb"
-                        accept="image/*"
-                        {...register("file", {
-                          required: true,
-                          onChange: handleContentChange
+                        id="video"
+                        {...register("videoAvatar", {
+                          onChange: handleVideoChange,
                         })}
                       />
                     </div>
                     <div className="w-full">
-                    {previewImgContent && (
-                      <div className="mb-6">
-                        <div className="relative w-full h-96 bg-gray-200 rounded">
-                          <img
-                            src={previewImgContent}
-                            className="object-contain mb-2 h-full"
-                            alt=""
-                          />
-                        </div>
-                      </div>
-                    )}
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div className="mb-4">
-                    <label htmlFor="photo" className="block mb-4 font-medium">
-                      Video File:
-                    </label>
-                    <input
-                      type="file"
-                      id="video"
-                      
-                      {...register("video", { onChange: handleVideoChange })}
-                    />
-                  </div>
-                  <div className="w-full">
-                  {video && (
+                      {video && (
                         <div className="mb-6 ">
                           <div className="relative flex justify-center w-full h-96 bg-gray-200 rounded">
                             <video style={{ height: "inherit" }} controls>
@@ -395,9 +419,36 @@ const ModalCreateWallpaper: React.FC<Props> = ({
                           </div>
                         </div>
                       )}
-                  
+                    </div>
                   </div>
-                </div>
+                )}
+                {type == 3 && (
+                  <div className="video-class">
+                    <div className="mb-4">
+                      <label htmlFor="photo" className="block mb-4 font-medium">
+                        Video Content:
+                      </label>
+                      <input
+                        type="file"
+                        id="video"
+                        {...register("videoContent", {
+                          onChange: handleVideoChange,
+                        })}
+                      />
+                    </div>
+                    <div className="w-full">
+                      {video && (
+                        <div className="mb-6 ">
+                          <div className="relative flex justify-center w-full h-96 bg-gray-200 rounded">
+                            <video style={{ height: "inherit" }} controls>
+                              <source src={video} type="video/mp4" />
+                            </video>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -1,8 +1,14 @@
-
-import React, { FC, useState } from 'react';
-import FetchCategory from './features/fetch-category';
-import ModalCreateCategory from '../../components/modal/modal-create-category';
-
+import React, { FC, useState,useRef, useContext, useEffect } from "react";
+import FetchCategory from "./features/fetch-category";
+import ModalCreateCategory from "../../components/modal/modal-create-category";
+import { CategoryContext, CategoryProvider } from "./context/category-context";
+import {
+  FormControl,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+} from "@mui/material";
+import FilterCategory from "./features/filter-category";
 
 interface pageProps {}
 
@@ -11,16 +17,27 @@ const Category: FC<pageProps> = ({}) => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [isCreateSuccess, setIsCreateSuccess] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const [keyword, setKeyword] = useState<string>();
+
+  
+ 
+  useEffect(()=>{
+
+  })
   return (
-    <div>
-      <div className="grid place-items-end mt-1">
-        <button className="rounded px-4 py-3 bg-blue-500" onClick={handleOpen}>
-          + Add category
-        </button>
+    <CategoryProvider>
+      <div>
+        <FilterCategory />
+        <FetchCategory keyword={keyword} isCreateSuccess={isCreateSuccess} />
+        <ModalCreateCategory
+          setIsCreateSuccess={setIsCreateSuccess}
+          open={open}
+          handleClose={handleClose}
+        />
       </div>
-      <FetchCategory isCreateSuccess={isCreateSuccess} />
-      <ModalCreateCategory setIsCreateSuccess={setIsCreateSuccess} open={open} handleClose={handleClose} />
-    </div>
+    </CategoryProvider>
   );
 };
 

@@ -19,19 +19,22 @@ function getPriceType(value: number) {
     return 'Coin';
   }
 }
-const useFetchWallpaper = (categoryId?: number) => {
+const useFetchWallpaper = (keyword?:string, categoryId?: number, type?: number) => {
   const [wallpapers, setWallpapers] = useState<any[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchWallpaper = async (token: string) => {
-    
+    setIsLoading(true)
     const res = await wallpaperService.fetchWallpaper(
       token,
       currentPage,
       pageSize,
-      categoryId
+      keyword,
+      categoryId,
+      type
     );
     const data = res.data.map((item: any) => (
       {
@@ -51,15 +54,17 @@ const useFetchWallpaper = (categoryId?: number) => {
           size: item.avatar.size, 
           mimetype: item.avatar.mimetype,
       },
-      contentFile: [], 
+      contentFile: item.contentFile, 
       categoryId: item.categoryId,
       author: item.author,
+      type: item.type,
       website: item.website,
   }
   ));
     
     setWallpapers(data);
     setTotalPages(Math.ceil(res.total / pageSize));
+    setIsLoading(false)
   };
   useEffect(() => {
     const token = localStorage.getItem("token") ?? "";
@@ -76,7 +81,9 @@ const useFetchWallpaper = (categoryId?: number) => {
     setTotalPages,
     setPageSize,
     setCurrentPage,
-    fetchWallpaper
+    fetchWallpaper,
+    isLoading,
+    setIsLoading
   };
 };
 

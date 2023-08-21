@@ -1,11 +1,6 @@
-import { FC, useState, useEffect, Dispatch, SetStateAction } from "react";
+import { FC, useState, useEffect,useContext, Dispatch, SetStateAction } from "react";
 
-import {
-  FormControl,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-} from "@mui/material";
+
 import {
   CategoryDetail,
   CategoryResponse,
@@ -13,21 +8,22 @@ import {
 import categoryService from "../../../services/categoryService";
 import ModalEditCategory from "../../../components/modal/modal-edit-category";
 import { parseDate } from "../../../shared/utils/parseDate";
+import { CategoryContext } from "../context/category-context";
 interface CategoryProps {
   isCreateSuccess: boolean;
+  keyword: string | undefined
 }
 
-const LIST_PAGE_SIZE = [10, 20, 30, 50, 100];
-const FetchCategory: FC<CategoryProps> = ({ isCreateSuccess }) => {
-  const [categories, setCategories] = useState<CategoryDetail[]>([]);
+
+const FetchCategory: FC<CategoryProps> = ({ isCreateSuccess, keyword }) => {
+
   const [categoryDetail, setCategoryDetail] = useState<CategoryDetail>();
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
-  const [currentpage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [totalPages, setTotalPages] = useState(0);
   const [listPage, setListPage] = useState<number[]>([]);
 
+  const {categories, setKeyword, getCategory} = useContext(CategoryContext)
+  
   const handleClose = () => setIsOpenEdit(false);
 
   const handleEdit = (cateItem: CategoryDetail) => {
@@ -35,44 +31,8 @@ const FetchCategory: FC<CategoryProps> = ({ isCreateSuccess }) => {
     setCategoryDetail(cateItem);
   };
 
-  const getCategory = async (token: string) => {
-    const res = await categoryService.fetchCategory(
-      token,
-      currentpage,
-      pageSize
-    );
-    const data = await res.data;
-    console.log(data);
-    const contentCategory = data.data.map((item: CategoryResponse) => ({
-      id: item.id,
-      name: item.name,
-      file_name: item.avatar.file_name,
-      path: item.avatar.path,
-      chartColor: item.chartColor,
-      createdAt: item.createdAt,
-      useCount: item.useCount ?? 0,
-      downloadCount: item.downloadCount ?? 0,
-    }));
-    setTotalPages(Math.ceil(data.total / pageSize));
-    setCategories(contentCategory);
-  };
-  const handlePaging = (event: SelectChangeEvent) => {
-    setCurrentPage(Number(event.target.value));
-  };
-  const handlePagingItem = (event: SelectChangeEvent) => {
-    setPageSize(Number(event.target.value));
-  };
-  const generatePageArray = () => {
-    const pageArray = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pageArray.push(i);
-    }
-    setListPage(pageArray);
-  };
   useEffect(() => {
-    const token = localStorage.getItem("token") ?? "";
-    getCategory(token);
-    generatePageArray();
+    getCategory()
   }, [updateSuccess, isCreateSuccess]);
 
   return (

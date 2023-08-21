@@ -11,15 +11,17 @@ type Wallpaper = {
   author: string;
   website: string;
   tag: string;
-  contentType: number;
+  type: number;
   avatar: File[];
-  file: File[];
+  file: any;
 };
 async function fetchWallpaper(
   token: string,
   page: number,
   per_page: number,
-  category_id?: number
+  keyword?: string,
+  category_id?: number,
+  content_type?: number
 ) {
   let config = {
     method: "get",
@@ -31,6 +33,8 @@ async function fetchWallpaper(
       page: page,
       per_page: per_page,
       ...(category_id && { category_id: category_id }),
+      ...(keyword && {keyword: keyword}),
+      ...(content_type && {content_type: content_type})
     },
   };
 
@@ -53,9 +57,15 @@ const createWallpaper = async (wallpaper: Wallpaper) => {
   formData.append("website", wallpaper.website);
   const tags = wallpaper.tag;
   formData.append("tag", tags);
-  formData.append("type", "1");
-  formData.append("contentFile", wallpaper.file[0]);
-  formData.append("avatar", wallpaper.avatar[0]);
+  formData.append("type", wallpaper.type.toString());
+  for (let i = 0; i < wallpaper.file.length; i++) {
+    formData.append('contentFile', wallpaper.file[i]);
+  }
+
+  for (let i = 0; i < wallpaper.avatar.length; i++) {
+    formData.append("avatar", wallpaper.avatar[i]);
+  }
+
 
   let config = {
     method: "post",
@@ -67,7 +77,7 @@ const createWallpaper = async (wallpaper: Wallpaper) => {
   };
 
   const res = await axios.request(config);
-  console.log(res);
+
   return res;
 };
 const updateWallpaper = async (
@@ -76,8 +86,7 @@ const updateWallpaper = async (
   id: number
 ) => {
   const formData = new FormData();
-  console.log(wallpaper);
-  
+
   formData.append("name", wallpaper.name);
   formData.append("category", wallpaper.category.toString());
   formData.append("priceType", wallpaper.priceType.toString());
@@ -93,6 +102,7 @@ const updateWallpaper = async (
   for (let i = 0; i < wallpaper.file.length; i++) {
     formData.append("contentFile", wallpaper.file[i]);
   }
+
   for (let i = 0; i < wallpaper.avatar.length; i++) {
     formData.append("avatar", wallpaper.avatar[i]);
   }

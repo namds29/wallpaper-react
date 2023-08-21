@@ -46,12 +46,7 @@ export type Wallpaper = {
       mimetype: string;
       file_name: string;
   };
-  contentFile: {
-      path: string;
-      size: number;
-      mimetype: string;
-      file_name: string;
-  };
+  contentFile: File[];
   categoryId: number;
   tag: string;
 };

@@ -1,9 +1,10 @@
 
 import { Box, Modal, Typography } from "@mui/material";
-import React, { useState, Dispatch, SetStateAction } from "react";
+import React, { useState, Dispatch, SetStateAction, useContext,useEffect } from "react";
 import { useForm } from "react-hook-form";
 import categoryService from "../../services/categoryService";
 import { Spin } from "antd";
+import { CategoryContext } from "../../pages/category/context/category-context";
 type Props = {
   // Define your component props here
   open: boolean;
@@ -31,6 +32,7 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
   const [photo, setPhoto] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const {setIsSuccess} = useContext(CategoryContext)
 
   const onSubmit = async (data: any) => {
     const token = localStorage.getItem("token") ?? "";
@@ -47,6 +49,7 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
         setIsLoading(false);
         handleClose();
         setIsCreateSuccess(true);
+        setIsSuccess(true)
         alert("Create success");
       }
     } catch (error) {
@@ -55,6 +58,11 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
     }
    
   };
+  useEffect(()=>{
+    return () =>{
+      setIsSuccess(false)
+    }
+  },[])
   const handlePhotoChange = (e: any) => {
     const file = e.target.files[0];
     setPhoto(file);
@@ -117,7 +125,7 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
                 <img
                   src={previewImage}
                   alt="Selected"
-                  className="object-cover mb-2"
+                  className="object-cover mb-2 h-full"
                 />
               </div>
             </div>

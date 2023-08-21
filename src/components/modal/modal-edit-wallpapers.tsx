@@ -1,4 +1,4 @@
-import { Box, Modal, Typography } from "@mui/material";
+import { Box, Modal } from "@mui/material";
 
 import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -13,14 +13,7 @@ type Props = {
   handleClose: () => void;
   setUpdateSuccess: Dispatch<SetStateAction<boolean>>;
 };
-type PriceType = {
-  [key: string]: number;
-};
-const PriceTypeMapping: PriceType = {
-  FREE: 0,
-  IAP: 1,
-  COIN: 2,
-};
+
 const style = {
   position: "absolute" as "absolute",
   top: "40%",
@@ -47,7 +40,6 @@ const ModalEditWallpapers: React.FC<Props> = ({
     control,
     formState: { errors },
   } = useForm({});
-
   const [isLoading, setIsLoading] = useState(false);
   const [fileName, setFileName] = useState<any>(null);
   const [thumbName, setThumbName] = useState<any>(null);
@@ -55,10 +47,10 @@ const ModalEditWallpapers: React.FC<Props> = ({
   const [priceTypeMap, setPriceTypeMap] = useState<string | undefined>(
     wallpaperDetail?.priceType
   );
-  const [previewImgAvatar, setPreviewImgAvatar] = useState<any>(wallpaperDetail?.avatar.path);
-  const [previewImgContent, setPreviewImgContent] = useState<any>(
-    wallpaperDetail?.contentFile.path
+  const [previewImgAvatar, setPreviewImgAvatar] = useState<any>(
+    wallpaperDetail?.avatar.path
   );
+  const [previewImgContent, setPreviewImgContent] = useState<any>(wallpaperDetail?.contentFile);
   const [textTagArea, setTextTagArea] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(
     wallpaperDetail?.categoryId
@@ -67,21 +59,18 @@ const ModalEditWallpapers: React.FC<Props> = ({
   const [previewImage, setPreviewImage] = useState<string | undefined>(
     wallpaperDetail?.avatar.path
   );
-  console.log(wallpaperDetail);
+  const [type, setType] = useState<number | undefined>(wallpaperDetail?.type);
+  const [video, setVideo] = useState<any>();
+
   const convertPriceType = (priceType: string) => {
-    if (priceType == 'Free') return '0';
-    if (priceType == 'IAP') return '1';
-    if (priceType == 'COIN') return '2';
-  }
+    if (priceType == "Free") return "0";
+    if (priceType == "IAP") return "1";
+    if (priceType == "COIN") return "2";
+  };
   const onSubmit = async (data: any) => {
     const token = localStorage.getItem("token") ?? "";
-    const wordArray = data.tag
-      .split(",")
-      .map((item: string) => item.trim())
-      .filter((item: string) => item != "");
-    if (wallpaperDetail) {
-      console.log(convertPriceType(data.priceType));
 
+    if (wallpaperDetail) {
       const wallPaperInfor = {
         name: data.name,
         category: Number(data.category),
@@ -93,7 +82,7 @@ const ModalEditWallpapers: React.FC<Props> = ({
         author: data.author,
         website: data.website,
         tag: data.tag,
-        contentType: Number(data.contentType),
+        type: Number(data.contentType),
         avatar: data.avatar,
         file: data.file,
       };
@@ -114,31 +103,40 @@ const ModalEditWallpapers: React.FC<Props> = ({
         setIsLoading(false);
         alert("Updated fail!");
       }
-
     }
   };
-  const handleThumbChange = (e: any) => {
-    const file = e.target.files[0];
-    setThumbName(file.name);
-    setPreviewImage(URL.createObjectURL(file));
-  };
-  const handleFileChange = (e: any) => {
-    const file = e.target.files[0];
-    setFileName(file.name);
-  };
+
   const getListCategory = async () => {
     const token = localStorage.getItem("token") ?? "";
     const listCategory = await categoryService.getCategoryList(token);
     setCategoryList(listCategory);
+  };
+  const handleVideoChange = (e: any) => {
+    const file = e.target.files[0];
+    const url = URL.createObjectURL(file);
+    setVideo(url);
   };
   const handleAvatarChange = (e: any) => {
     const file = e.target.files[0];
     setPreviewImgAvatar(URL.createObjectURL(file));
   };
   const handleContentChange = (e: any) => {
-    const file = e.target.files[0];
-    setPreviewImgContent(URL.createObjectURL(file));
+    const files = Array.from(e.target.files);
+
+    const previews = files
+      .slice(0, 2)
+      .map((file: any) => URL.createObjectURL(file));
+
+    setPreviewImgContent(previews);
   };
+  const handleChangeType = (e: any) => {
+    const val = +e.target.value;
+
+    if (val === 1) setType(1);
+    if (val === 2) setType(2);
+    if (val === 3) setType(3);
+  };
+
   useEffect(() => {
     getListCategory();
     setFileName(wallpaperDetail?.avatar.file_name);
@@ -154,6 +152,7 @@ const ModalEditWallpapers: React.FC<Props> = ({
         }
       }
     }
+
     reset();
     return () => {
       reset();
@@ -191,7 +190,7 @@ const ModalEditWallpapers: React.FC<Props> = ({
                 </div>
                 <div className="mb-4">
                   <label htmlFor="name" className="block mb-2 font-medium">
-                    Category*:
+                    Category:
                   </label>
 
                   <Controller
@@ -204,6 +203,9 @@ const ModalEditWallpapers: React.FC<Props> = ({
                         {...field}
                         className="block w-full px-2 py-3 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       >
+                        <option key={"cater-none"} value="">
+                          None
+                        </option>
                         {categoryList &&
                           categoryList.map((cateItem) => (
                             <option
@@ -276,7 +278,6 @@ const ModalEditWallpapers: React.FC<Props> = ({
                         control={control}
                         defaultValue={priceTypeMap}
                         render={({ field }) => {
-
                           return (
                             <>
                               <input
@@ -334,7 +335,6 @@ const ModalEditWallpapers: React.FC<Props> = ({
                       type="number"
                       className=" border border-gray-300 rounded-md px-2 py-1"
                       placeholder="Enter trending"
-                      
                       defaultValue={wallpaperDetail?.trendingPriority}
                       {...register("priorityTrending", {
                         required: true,
@@ -401,69 +401,145 @@ const ModalEditWallpapers: React.FC<Props> = ({
                   </label>
                   <select
                     id="small"
+                    defaultValue={wallpaperDetail?.type}
                     className="block w-full px-2 py-3 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    {...register("contentType", { required: true })}
+                    {...register("contentType", {
+                      required: true,
+                      onChange: handleChangeType,
+                    })}
                   >
                     {/* <option selected disabled hidden>Choose a country</option> */}
-                    <option value="0">single_image</option>
-                    <option value="1">double_image</option>
+                    <option value="1">single image</option>
+                    <option value="2">double image</option>
+                    <option value="3">video</option>
                   </select>
                 </div>
                 <div className="flex mb-4 gap-10">
-                  <div>
-                    <div className="mb-4">
-                      <label htmlFor="photo" className="block mb-4 font-medium">
-                        Avatar File*:
-                      </label>
-                      <input
-                        type="file"
-                        id="file"
-                        accept="image/*"
-                        {...register("avatar", { onChange: handleAvatarChange })}
-                      />
-                    </div>
-                    <div className="w-full">
-                      {previewImgAvatar && (
-                        <div className="mb-6">
-                          <div className="relative w-full h-96 bg-gray-200 rounded">
-                            <img
-                              src={previewImgAvatar}
-                              className="object-contain mb-2 h-full"
-                              alt=""
-                            />
+                  {(type == 1 || type == 3) && (
+                    <div className="avatar">
+                      <div className="mb-4">
+                        <label
+                          htmlFor="photo"
+                          className="block mb-4 font-medium"
+                        >
+                          Avatar File*:
+                        </label>
+                        <input
+                          type="file"
+                          id="file"
+                          accept="image/*"
+                          {...register("avatar", {
+                            onChange: handleAvatarChange,
+                          })}
+                        />
+                      </div>
+                      <div className="w-full">
+                        {previewImgAvatar && (
+                          <div className="mb-6">
+                            <div className="relative w-full h-96 bg-gray-200 rounded">
+                              <img
+                                src={previewImgAvatar}
+                                className="object-contain mb-2 h-full"
+                                alt=""
+                              />
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div>
+                  {(type == 1 || type == 2) && (
+                    <div className="content-file">
+                      <div className="mb-4">
+                        <label
+                          htmlFor="photo"
+                          className="block mb-4 font-medium"
+                        >
+                          Content File*:
+                        </label>
+                        <input
+                          type="file"
+                          id="thumb"
+                          multiple
+                          accept="image/*"
+                          {...register("file", {
+                            required: true,
+                            onChange: handleContentChange,
+                          })}
+                        />
+                      </div>
+                      <div className="w-full flex gap-5">
+                        {previewImgContent &&
+                          previewImgContent.map((item: any, id: number) => (
+                            <div key={id} className="mb-6">
+                              <div className="relative w-full h-96 bg-gray-200 rounded">
+                                <img
+                                  src={item.path ?? item}
+                                  className="object-contain mb-2 h-full"
+                                  alt=""
+                                />
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {type == 2 && (
+                  <div className="video-class">
                     <div className="mb-4">
                       <label htmlFor="photo" className="block mb-4 font-medium">
-                        Content File*:
+                        Video Avatar:
                       </label>
                       <input
                         type="file"
-                        id="thumb"
-                        accept="image/*"
-                        {...register("file", { onChange: handleContentChange })}
+                        id="video"
+                        {...register("videoAvatar", {
+                          onChange: handleVideoChange,
+                        })}
                       />
                     </div>
                     <div className="w-full">
-                      {previewImgContent && (
-                        <div className="mb-6">
-                          <div className="relative w-full h-96 bg-gray-200 rounded">
-                            <img
-                              src={previewImgContent}
-                              className="object-contain mb-2 h-full"
-                              alt=""
-                            />
+                      {video && (
+                        <div className="mb-6 ">
+                          <div className="relative flex justify-center w-full h-96 bg-gray-200 rounded">
+                            <video style={{ height: "inherit" }} controls>
+                              <source src={video} type="video/mp4" />
+                            </video>
                           </div>
                         </div>
                       )}
                     </div>
                   </div>
-                </div>
+                )}
+                {type == 3 && (
+                  <div className="video-class">
+                    <div className="mb-4">
+                      <label htmlFor="photo" className="block mb-4 font-medium">
+                        Video Content:
+                      </label>
+                      <input
+                        type="file"
+                        id="video"
+                        {...register("videoContent", {
+                          onChange: handleVideoChange,
+                        })}
+                      />
+                    </div>
+                    <div className="w-full">
+                      {video && (
+                        <div className="mb-6 ">
+                          <div className="relative flex justify-center w-full h-96 bg-gray-200 rounded">
+                            <video style={{ height: "inherit" }} controls>
+                              <source src={video} type="video/mp4" />
+                            </video>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -11,7 +11,7 @@ type CreateCategory = {
   chartColor: string;
   file: File[];
 };
-const fetchCategory = async (token: string,page:number, per_page:number) => {
+const fetchCategory = async (token: string,page:number, per_page:number, keyword: string) => {
   let config = {
     method: "get",
     maxBodyLength: Infinity,
@@ -21,7 +21,8 @@ const fetchCategory = async (token: string,page:number, per_page:number) => {
     },
     params: {
       page: page,
-      per_page: per_page
+      per_page: per_page,
+      keyword:  keyword
     }
   };
 
