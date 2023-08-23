@@ -8,6 +8,8 @@ interface pageProps {}
 const Page: FC<pageProps> = ({}) => {
   const [keyword, setKeyword] = useState<string>();
   const [type, setType] = useState<number>();
+  const [typeSort, setTypeSort] = useState<number>();
+  const [sortField, setSortField] = useState<string>("name");
   const [categoryId, setCategoryId] = useState<number>();
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
@@ -22,7 +24,7 @@ const Page: FC<pageProps> = ({}) => {
     fetchWallpaper,
     isLoading,
     setIsLoading
-  } = useFetchWallpaper(keyword, categoryId, type);
+  } = useFetchWallpaper(keyword, categoryId, type, sortField, typeSort);
 
   const updateCategoryId = (id: number) => {
     setCategoryId(id);
@@ -33,11 +35,17 @@ const Page: FC<pageProps> = ({}) => {
   const filterType = (type: number) => {
     setType(type);
   };
+  const sortAscDesc = (type: number) => {
+    setTypeSort(type);
+  };
+  const sortByField = (field: string) => {
+    setSortField(field);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token") ?? "";
     fetchWallpaper(token);
-  }, [keyword, type, categoryId, updateSuccess]);
+  }, [keyword, type, categoryId, updateSuccess,sortField, typeSort]);
   return (
     <div>
       <FilterWallpaper
@@ -46,6 +54,9 @@ const Page: FC<pageProps> = ({}) => {
         isLoading={isLoading}
         setIsLoading={setIsLoading}
         filterType={filterType}
+        sortByField={sortByField}
+        sortAscDesc={sortAscDesc}
+
       />
       <FetchWallpaper
         wallpapers={wallpapers}

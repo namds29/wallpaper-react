@@ -1,6 +1,11 @@
-
 import { Box, Modal, Typography } from "@mui/material";
-import React, { useState, Dispatch, SetStateAction, useContext,useEffect } from "react";
+import React, {
+  useState,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+} from "react";
 import { useForm } from "react-hook-form";
 import categoryService from "../../services/categoryService";
 import { Spin } from "antd";
@@ -10,6 +15,7 @@ type Props = {
   open: boolean;
   handleClose: () => void;
   setIsCreateSuccess: Dispatch<SetStateAction<boolean>>;
+  isCreateSuccess: any
 };
 const style = {
   position: "absolute" as "absolute",
@@ -23,16 +29,22 @@ const style = {
   borderRadius: 2,
 };
 
-const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSuccess }: Props) => {
+const ModalCreateCategory: React.FC<Props> = ({
+  open,
+  handleClose,
+  setIsCreateSuccess,
+  isCreateSuccess
+}: Props) => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
   const [photo, setPhoto] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const {setIsSuccess} = useContext(CategoryContext)
+  const { setIsSuccess } = useContext(CategoryContext);
 
   const onSubmit = async (data: any) => {
     const token = localStorage.getItem("token") ?? "";
@@ -49,25 +61,27 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
         setIsLoading(false);
         handleClose();
         setIsCreateSuccess(true);
-        setIsSuccess(true)
+        setIsSuccess(true);
         alert("Create success");
       }
     } catch (error) {
       setIsLoading(false);
       alert("Create fail!");
     }
-   
   };
-  useEffect(()=>{
-    return () =>{
-      setIsSuccess(false)
-    }
-  },[])
   const handlePhotoChange = (e: any) => {
     const file = e.target.files[0];
     setPhoto(file);
     setPreviewImage(URL.createObjectURL(file));
   };
+  useEffect(() => {
+    return () => {
+      console.log("here");
+      reset();
+      setIsSuccess(false);
+    };
+  }, [isCreateSuccess]);
+
   return (
     <Modal
       open={open}
@@ -88,7 +102,7 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
               type="text"
               id="name"
               className="w-full border border-gray-300 rounded-md px-3 py-2"
-              {...register("name")}
+              {...register("name", { required: true })}
             />
           </div>
           <div className="mb-4">
@@ -98,7 +112,7 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
             <input
               type="color"
               className="border border-solid border-gray-300"
-              {...register("chartColor")}
+              {...register("chartColor", { required: true })}
             />
           </div>
           <div className="mb-4">
@@ -110,7 +124,10 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
               id="photo"
               accept="image/*"
               className="hidden"
-              {...register("photo", { onChange: handlePhotoChange })}
+              {...register("photo", {
+                required: true,
+                onChange: handlePhotoChange,
+              })}
             />
             <label
               htmlFor="photo"
@@ -132,7 +149,7 @@ const ModalCreateCategory: React.FC<Props> = ({ open, handleClose, setIsCreateSu
           )}
 
           <div className="flex justify-end">
-          {isLoading ? (
+            {isLoading ? (
               <Spin>
                 <button
                   type="submit"

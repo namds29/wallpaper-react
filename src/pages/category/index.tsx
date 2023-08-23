@@ -1,4 +1,4 @@
-import React, { FC, useState,useRef, useContext, useEffect } from "react";
+import React, { FC, useState, useRef, useContext, useEffect } from "react";
 import FetchCategory from "./features/fetch-category";
 import ModalCreateCategory from "../../components/modal/modal-create-category";
 import { CategoryContext, CategoryProvider } from "./context/category-context";
@@ -21,21 +21,12 @@ const Category: FC<pageProps> = ({}) => {
   const timeoutRef = useRef<number | null>(null);
   const [keyword, setKeyword] = useState<string>();
 
-  
- 
-  useEffect(()=>{
-
-  })
+  useEffect(() => {});
   return (
     <CategoryProvider>
       <div>
         <FilterCategory />
         <FetchCategory keyword={keyword} isCreateSuccess={isCreateSuccess} />
-        <ModalCreateCategory
-          setIsCreateSuccess={setIsCreateSuccess}
-          open={open}
-          handleClose={handleClose}
-        />
       </div>
     </CategoryProvider>
   );

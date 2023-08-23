@@ -21,7 +21,9 @@ async function fetchWallpaper(
   per_page: number,
   keyword?: string,
   category_id?: number,
-  content_type?: number
+  content_type?: number,
+  sort_field?: string,
+  sort_order?: number
 ) {
   let config = {
     method: "get",
@@ -34,7 +36,9 @@ async function fetchWallpaper(
       per_page: per_page,
       ...(category_id && { category_id: category_id }),
       ...(keyword && {keyword: keyword}),
-      ...(content_type && {content_type: content_type})
+      ...(content_type && {content_type: content_type}),
+      ...(sort_field && {sort_field: sort_field}),
+      ...(sort_order && {sort_order: sort_order}),
     },
   };
 

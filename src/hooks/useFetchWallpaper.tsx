@@ -19,7 +19,7 @@ function getPriceType(value: number) {
     return 'Coin';
   }
 }
-const useFetchWallpaper = (keyword?:string, categoryId?: number, type?: number) => {
+const useFetchWallpaper = (keyword?:string, categoryId?: number, type?: number,sortField?: string, typeSort?: number) => {
   const [wallpapers, setWallpapers] = useState<any[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -34,7 +34,9 @@ const useFetchWallpaper = (keyword?:string, categoryId?: number, type?: number) 
       pageSize,
       keyword,
       categoryId,
-      type
+      type,
+      sortField,
+      typeSort
     );
     const data = res.data.map((item: any) => (
       {

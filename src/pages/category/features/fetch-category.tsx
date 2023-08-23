@@ -37,7 +37,7 @@ const FetchCategory: FC<CategoryProps> = ({ isCreateSuccess, keyword }) => {
 
   return (
     <>
-      <div className="grid grid-cols-4 mt-5 gap-5 overflow-y-auto max-h-[calc(100vh-230px)] pr-4">
+      <div className="grid grid-cols-4 mt-5 gap-5 overflow-y-auto max-h-[calc(65vh)] pr-4">
         {categories &&
           categories.map((item, index) => (
             <div key={index} className="bg-primary relative rounded w-full p-5">

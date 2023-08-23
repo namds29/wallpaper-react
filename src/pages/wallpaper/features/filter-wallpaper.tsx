@@ -13,21 +13,27 @@ interface FilterWallpaperProps {
   updateCategoryId: (id: number) => void;
   filterKeyword: (keyword: string) => void;
   filterType: (type: number) => void;
+  sortByField: any;
+  sortAscDesc: any;
   isLoading: boolean;
-  setIsLoading: any
+  setIsLoading: any;
 }
 
 const FilterWallpaper: FC<FilterWallpaperProps> = ({
   updateCategoryId,
   filterKeyword,
   filterType,
+  sortByField,
+  sortAscDesc,
   isLoading,
-  setIsLoading
+  setIsLoading,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [categoryList, getCategoryList] = useState<ListCategory[]>([]);
   const [categoryName, setCategoryName] = useState<string>("Category");
-  const [type, setType] = useState<string>('Type');
+  const [sortField, setSortField] = useState<string>("name");
+  const [sortType, setSortType] = useState<number>(0);
+  const [type, setType] = useState<string>("Type");
   const inputRef = useRef<HTMLInputElement>(null);
   const timeoutRef = useRef<number | null>(null);
 
@@ -41,37 +47,46 @@ const FilterWallpaper: FC<FilterWallpaperProps> = ({
   const handleClose = () => setIsOpen(false);
 
   const handleChange = async (event: SelectChangeEvent) => {
-    setIsLoading(true)
-    let value = event.target.value
-    if(value == "All"){
-      setCategoryName('');
-      value = ''
-    } 
-    if(event.target.value == "All") setCategoryName('')
+    setIsLoading(true);
+    let value = event.target.value;
+    if (value == "All") {
+      setCategoryName("");
+      value = "";
+    }
+    if (event.target.value == "All") setCategoryName("");
     setCategoryName(event.target.value);
     updateCategoryId(Number(value));
   };
-   const filterCategoryType= (event: SelectChangeEvent) => {
-    let value = event.target.value
-    if(value == "All"){
-      setType('');
-      value = ''
-    } 
+
+  const handleSortByField = async (e: SelectChangeEvent) => {
+    setSortField(e.target.value);
+    sortByField(e.target.value)
+  };
+
+  const handleSortAscDesc = async (e: SelectChangeEvent) => {
+    setSortType(+e.target.value);
+    sortAscDesc(+e.target.value)
+  };
+
+  const filterCategoryType = (event: SelectChangeEvent) => {
+    let value = event.target.value;
+    if (value == "All") {
+      setType("");
+      value = "";
+    }
     setType(event.target.value);
     filterType(Number(value));
   };
-  const handleInputChange =  () => {
+  const handleInputChange = () => {
     if (inputRef.current != null) {
       const value = inputRef.current.value.toLowerCase();
       clearTimeout(timeoutRef.current as number); // Clear the previous timeout
       timeoutRef.current = setTimeout(() => {
         const filtered = value.toLowerCase();
-        filterKeyword(filtered)
-       // Call the filterKeyword function with the keyword
+        filterKeyword(filtered);
+        // Call the filterKeyword function with the keyword
       }, 500);
-     
     }
-
   };
 
   useEffect(() => {
@@ -121,7 +136,7 @@ const FilterWallpaper: FC<FilterWallpaperProps> = ({
             />
           </FormControl>
 
-           <FormControl fullWidth>
+          <FormControl fullWidth>
             <Select
               sx={{ backgroundColor: "white", height: 40 }}
               labelId="category"
@@ -132,24 +147,69 @@ const FilterWallpaper: FC<FilterWallpaperProps> = ({
               <MenuItem value="Type" disabled>
                 <em>Type</em>
               </MenuItem>
-               <MenuItem value="All">
+              <MenuItem value="All">
                 <em>All</em>
               </MenuItem>
-               <MenuItem value="1">
+              <MenuItem value="1">
                 <em>Single Image</em>
               </MenuItem>
-               <MenuItem value="2">
+              <MenuItem value="2">
                 <em>Double Image</em>
               </MenuItem>
-               <MenuItem value="3">
+              <MenuItem value="3">
                 <em>Video</em>
               </MenuItem>
-              
             </Select>
           </FormControl>
         </div>
 
-        <div className="grid place-items-end mt-5">
+        <div className="flex justify-between mt-4 ">
+          <div className="sort flex items-center gap-4">
+            <p className="">Sort by:</p>
+            <FormControl>
+              <Select
+                sx={{ backgroundColor: "white", height: 40 }}
+                labelId="category"
+                id="category"
+                value={sortField}
+                onChange={handleSortByField}
+              >
+                <MenuItem value="id">
+                  <em>Id</em>
+                </MenuItem>
+                <MenuItem value="name">
+                  <em>Name</em>
+                </MenuItem>
+                <MenuItem value="price">
+                  <em>Price</em>
+                </MenuItem>
+                <MenuItem value="createdAt">
+                  <em>Created at</em>
+                </MenuItem>
+                <MenuItem value="updatedAt">
+                  <em>Updated at</em>
+                </MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl>
+              <Select
+                sx={{ backgroundColor: "white", height: 40 }}
+                labelId="category"
+                id="category"
+                value={sortType.toString()}
+                onChange={handleSortAscDesc}
+              >
+                <MenuItem value="0">
+                  <em>Ascending</em>
+                </MenuItem>
+                <MenuItem value="1">
+                  <em>Descending</em>
+                </MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+
           <button
             className="rounded px-3 py-2 text-sm bg-blue-500"
             onClick={handleOpenModal}

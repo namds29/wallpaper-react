@@ -8,22 +8,26 @@ import { SelectChangeEvent } from "@mui/material";
 
 interface Props {
   categories: CategoryDetail[];
-  keyword: string,
+  keyword: string;
   setCategories: React.Dispatch<React.SetStateAction<CategoryDetail[]>>;
-  setKeyword: any,
-  filterKeyword: any,
-  getCategory: any,
-  setIsSuccess: any
+  setKeyword: any;
+  filterKeyword: any;
+  getCategory: any;
+  setIsSuccess: any;
+  sortAscDesc: any;
+  sortByField: any;
   //   setSearchByName: React.Dispatch<React.SetStateAction<string>>;
 }
 export const CategoryContext = createContext<Props>({
   categories: [],
-  keyword: '',
+  keyword: "",
   setCategories: () => {},
-  setKeyword : () => {},
-  filterKeyword : (keyword: string) =>{},
+  setKeyword: () => {},
+  filterKeyword: (keyword: string) => {},
   getCategory: () => {},
   setIsSuccess: () => {},
+  sortAscDesc: () => {},
+  sortByField: () => {},
 });
 
 export const CategoryProvider = ({
@@ -35,9 +39,17 @@ export const CategoryProvider = ({
   const [pageSize, setPageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState(0);
   const [categories, setCategories] = useState<CategoryDetail[]>([]);
-  const [keyword, setKeyword] = useState<string>('');
-  const [isSuccess, setIsSuccess] = useState<string>('');
+  const [keyword, setKeyword] = useState<string>("");
+  const [isSuccess, setIsSuccess] = useState<string>("");
+  const [typeSort, setTypeSort] = useState<number>();
+  const [sortField, setSortField] = useState<string>("name");
 
+  const sortAscDesc = (type: number) => {
+    setTypeSort(type);
+  };
+  const sortByField = (field: string) => {
+    setSortField(field);
+  };
 
   const filterKeyword = (keyword: string) => {
     setKeyword(keyword);
@@ -55,10 +67,12 @@ export const CategoryProvider = ({
       token,
       currentpage,
       pageSize,
-      keyword
+      keyword,
+      typeSort,
+      sortField
     );
     const data = await res.data;
-    
+
     const contentCategory = data.data.map((item: CategoryResponse) => ({
       id: item.id,
       name: item.name,
@@ -74,9 +88,21 @@ export const CategoryProvider = ({
   };
   useEffect(() => {
     getCategory();
-  }, [keyword,isSuccess]);
+  }, [keyword, isSuccess,sortField, typeSort]);
   return (
-    <CategoryContext.Provider value={{ categories, keyword, setCategories, setKeyword, filterKeyword, getCategory, setIsSuccess}}>
+    <CategoryContext.Provider
+      value={{
+        categories,
+        keyword,
+        setCategories,
+        setKeyword,
+        filterKeyword,
+        getCategory,
+        setIsSuccess,
+        sortAscDesc,
+        sortByField,
+      }}
+    >
       {children}
     </CategoryContext.Provider>
   );
